@@ -134,7 +134,19 @@ public class MavenImport extends ProjectImport {
 	 */
 	private void build() throws ImportException {
 		try {
-			Process process = Runtime.getRuntime().exec(new String[] { "mvn", "clean", "compile" }, new String[0],
+			String[] args;
+			switch (OperationSystem.os) {
+			case WINDOWS:
+				args = new String[] { "cmd", "/c \" mvn clean compile" };
+				break;
+			case LINUX:
+				args = new String[] { "mvn", "clean", "compile" };
+				break;
+			default:
+				LOGGER.warn("Unsupported OS");
+				throw new ImportException("operating system not supported");
+			}
+			Process process = Runtime.getRuntime().exec(args, new String[0],
 					getRootDir());
 			if (!Execute.execute(process) && !ignoreBuildErrors()) {
 				throw new ImportException("Couldn't build the maven project");
